@@ -1,6 +1,37 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from chatterbot.trainers import ListTrainer
+import wave, math, contextlib
+import speech_recognition as sr
+from moviepy.editor import AudioFileClip
+
+""" In this modeule we get the video transcript of the tutoial video"""
+# the saved file of the converted video
+
+transcribed_audio_file_name = "transcribed_speech.wav"
+zoom_video_file_name = "name_of_your_video.mp4"
+
+# video is first converted into audio
+audioclip = AudioFileClip(zoom_video_file_name)
+audioclip.write_audiofile(transcribed_audio_file_name)
+
+# divided into frames for ease of working with the video
+# the api also has a limit of file size request
+with contextlib.closing(wave.open(transcribed_audio_file_name,'r')) as f:
+    frames = f.getnframes()
+    rate = f.getframerate()
+    duration = frames / float(rate)
+total_duration = math.ceil(duration / 60)
+r = sr.Recognizer()
+#convert frames to txt
+for i in range(0, total_duration):
+    with sr.AudioFile(transcribed_audio_file_name) as source:
+        audio = r.record(source, offset=i*60, duration=60)
+    f = open("try.txt", "a")
+    f.write(r.recognize_google(audio))
+    f.write(" ")
+f.close()
+
 
 # we create the questions from the video tutorial.
 """" We will first create a function that creates questions from the tutorial video.
